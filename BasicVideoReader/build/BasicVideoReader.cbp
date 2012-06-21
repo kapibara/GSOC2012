@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+   <FileVersion major="1" minor="6" />
+   <Project>
+      <Option title="BasicVideoReader" />
+      <Option makefile_is_custom="1" />
+      <Option compiler="gcc" />
+      <Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\usr\;CMake Files\..\..\..\..\usr\share\;CMake Files\..\..\..\..\usr\share\cmake-2.8\;CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\;CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Platform\;CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Compiler\;CMake Files\..\..\..\..\usr\share\OpenCV-2.3.1\;CMake Files\src\;" />
+      <Build>
+      <Target title="all">
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 all" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="edit_cache">
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 edit_cache" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="install">
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 install" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="install/local">
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 install/local" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="install/strip">
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 install/strip" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="list_install_components">
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 list_install_components" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="rebuild_cache">
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 rebuild_cache" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="offline">
+         <Option output="/home/kuznetso/Development/BasicVideoReader/build/src/offline" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build/src" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/usr/include/opencv-2.3.1/opencv" />
+            <Add directory="/usr/include/opencv-2.3.1" />
+            <Add directory="/home/kuznetso/Development/BasicVideoReader/include" />
+            <Add directory="/home/kuznetso/Development/KinectOpenNIVideocapture/include" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 offline" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="offline/fast">
+         <Option output="/home/kuznetso/Development/BasicVideoReader/build/src/offline" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build/src" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/usr/include/opencv-2.3.1/opencv" />
+            <Add directory="/usr/include/opencv-2.3.1" />
+            <Add directory="/home/kuznetso/Development/BasicVideoReader/include" />
+            <Add directory="/home/kuznetso/Development/KinectOpenNIVideocapture/include" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 offline/fast" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="online">
+         <Option output="/home/kuznetso/Development/BasicVideoReader/build/src/online" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build/src" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/usr/include/opencv-2.3.1/opencv" />
+            <Add directory="/usr/include/opencv-2.3.1" />
+            <Add directory="/home/kuznetso/Development/BasicVideoReader/include" />
+            <Add directory="/home/kuznetso/Development/KinectOpenNIVideocapture/include" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 online" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="online/fast">
+         <Option output="/home/kuznetso/Development/BasicVideoReader/build/src/online" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="/home/kuznetso/Development/BasicVideoReader/build/src" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/usr/include/opencv-2.3.1/opencv" />
+            <Add directory="/usr/include/opencv-2.3.1" />
+            <Add directory="/home/kuznetso/Development/BasicVideoReader/include" />
+            <Add directory="/home/kuznetso/Development/KinectOpenNIVideocapture/include" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 online/fast" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/kuznetso/Development/BasicVideoReader/build/src/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      </Build>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/src/easyhandsegmentation.cpp">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/src/easyhandtracker.cpp">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/src/handsegmentation.cpp">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/src/handtracker.cpp">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/src/main.cpp">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/src/onlineTrackingMain.cpp">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/include/easyhandsegmentation.h">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/include/easyhandtracker.h">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/include/extractContour.h">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/include/fastqueue.hpp">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/include/handsegmentation.h">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/include/handtracker.h">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/include/rect3d.hpp">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/include/segmentHandEasy.h">
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/CMakeSystemSpecificInformation.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/CMakeGenericSystem.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/CMakeFindCodeBlocks.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/CMakeCInformation.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/CMakeCommonLanguageInclude.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/CMakeCXXInformation.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/CMakeCommonLanguageInclude.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Platform/Linux.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Platform\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Platform/UnixPaths.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Platform\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Platform/Linux-GNU-C.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Platform\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Platform/Linux-GNU.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Platform\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Platform/Linux-GNU-CXX.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Platform\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Platform/Linux-GNU.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Platform\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Compiler/GNU-C.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Compiler\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Compiler/GNU.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Compiler\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Compiler/GNU-CXX.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Compiler\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/cmake-2.8/Modules/Compiler/GNU.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\cmake-2.8\Modules\Compiler\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/OpenCV-2.3.1/OpenCVConfig-version.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\OpenCV-2.3.1\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/../../../../usr/share/OpenCV-2.3.1/OpenCVConfig.cmake">
+          <Option virtualFolder="CMake Files\..\..\..\..\usr\share\OpenCV-2.3.1\" />
+      </Unit>
+      <Unit filename="/home/kuznetso/Development/BasicVideoReader/src/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\src\" />
+      </Unit>
+   </Project>
+</CodeBlocks_project_file>

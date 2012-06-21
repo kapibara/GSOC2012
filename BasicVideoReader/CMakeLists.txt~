@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 2.6)
+
+project(ReadAndDisplay)
+
+set(HOME ${CMAKE_CURRENT_SOURCE_DIR})
+
+if(NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+#if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX ${HOME}/bin)
+#endif()
+
+
+message("Current vesion: ${CMAKE_VERSION}")
+message("Installation prefix: ${CMAKE_INSTALL_PREFIX}")
+message("Home: ${HOME}")
+
+include_directories(${HOME}/include)
+include_directories(${OPENCV})
+
+add_subdirectory(${HOME}/src)

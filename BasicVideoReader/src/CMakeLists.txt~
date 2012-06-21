@@ -1,0 +1,11 @@
+set(EXECNAME exec)
+
+set(SOURCE )
+
+set(LIBS )
+
+add_executable(${EXECNAME} ${SOURCE})
+
+target_link_libraries(${EXECNAME} ${LIBS})
+
+install(TARGETS ${EXECNAME} DESTINATION bin) #install in bin dir by default

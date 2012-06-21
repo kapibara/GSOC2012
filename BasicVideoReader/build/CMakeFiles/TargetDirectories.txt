@@ -1,0 +1,2 @@
+/home/kuznetso/Development/BasicVideoReader/build/src/CMakeFiles/offline.dir
+/home/kuznetso/Development/BasicVideoReader/build/src/CMakeFiles/online.dir
