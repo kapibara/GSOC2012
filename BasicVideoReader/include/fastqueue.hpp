@@ -15,6 +15,11 @@ public:
         delete [] _buffer;
     }
 
+    void clear(){
+        _front = _back = 0;
+        _size = 0;
+    }
+
     T &front(){
         return _buffer[_front];
     }

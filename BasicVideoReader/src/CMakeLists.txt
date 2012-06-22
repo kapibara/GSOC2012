@@ -3,10 +3,10 @@ set(OFFLINEEXEC offline)
 
 set(ONLINEEXEC online)
 
-set(CLASSES handsegmentation.cpp
-            easyhandsegmentation.cpp
-            handtracker.cpp
-            easyhandtracker.cpp)
+set(CLASSES easyhandsegmentation.cpp
+            easyhandtracker.cpp
+            handdetector.cpp
+   )
 
 set(OFFLINE main.cpp)
 
@@ -19,7 +19,8 @@ set(HEADERS ../include/segmentHandEasy.h
             ../include/extractContour.h
             ../include/handtracker.h
             ../include/easyhandtracker.h
-            ../include/rect3d.hpp)
+            ../include/rect3d.hpp
+            ../include/handdetector.h)
 
 set(ILIBNAME libddconverter)
 

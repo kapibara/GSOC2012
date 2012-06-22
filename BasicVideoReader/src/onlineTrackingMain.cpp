@@ -22,16 +22,18 @@ int main(int argc, char **argv)
 
         cout << "Capture device: isOpened: " << capture.isOpened() << endl;
 
-        capture.set( CV_CAP_OPENNI_IMAGE_GENERATOR_OUTPUT_MODE, CV_CAP_OPENNI_VGA_30HZ );
+  //      capture.set( CV_CAP_OPENNI_IMAGE_GENERATOR_OUTPUT_MODE, CV_CAP_OPENNI_VGA_30HZ );
         capture.grab();
+
         capture.retrieve( depthMap, CV_CAP_OPENNI_BGR_IMAGE );
+        capture.retrieve( rgbImage, CV_CAP_OPENNI_BGR_IMAGE );
+
 
         cout << "Frame size: " << depthMap.size().width << ";" << depthMap.size().height << endl;
         cout << "FPS: " << capture.get(CV_CAP_PROP_FPS) << endl;
 
         Mat mask = Mat(depthMap.size(),CV_8UC1);
         EasyHandTracker tracker;
-        bool trackResult;
         tracker.init();
 
         while(true)
@@ -39,22 +41,19 @@ int main(int argc, char **argv)
             capture.grab();
 
 
-            cout << "retrieve depth image: " << capture.retrieve( depthMap, CV_CAP_OPENNI_DEPTH_MAP ) << endl;
-            cout << "retrieve rgb image: " << capture.retrieve( rgbImage, CV_CAP_OPENNI_BGR_IMAGE ) << endl;
+            capture.retrieve( depthMap, CV_CAP_OPENNI_DEPTH_MAP );
+            capture.retrieve( rgbImage, CV_CAP_OPENNI_BGR_IMAGE );
 
-            trackResult = tracker.track(mask,depthMap,rgbImage);
+            tracker.track(mask,depthMap,rgbImage);
 
-            cout << "Track result: " << trackResult << endl;
+       //     cout << "Track result: " << trackResult << endl;
 
-            imshow("RGB",rgbImage);
-            imshow("Depth",depthMap);
-            imshow("Mask",mask);
+            imshow("Mask",rgbImage);
 
             key = waitKey(10);
             if (key == 'q')
                 break;
-
-            //restart tracking
+        //    //restart tracking
             if (key == 's')
                 tracker.init();
         }

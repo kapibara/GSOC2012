@@ -1,17 +1,30 @@
 #include "easyhandsegmentation.h"
-#include "fastqueue.hpp"
 
-EasyHandSegmentation::EasyHandSegmentation(int maxHandSize, double distance)
+#include <iostream>
+
+using namespace std;
+
+EasyHandSegmentation::EasyHandSegmentation(int maxObjectSize):_pixels(maxObjectSize)
 {
-    CV_Assert(maxHandSize>0);
+    CV_Assert(maxObjectSize>0);
 
-    _maxHandSizeCoeff = maxHandSize*distance;
+    _maxObjectSize = maxObjectSize;
     _depthThr = 50;
 }
 
-void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect &region, const cv::Mat &rgb, const cv::Mat &depth)
+EasyHandSegmentation::~EasyHandSegmentation()
+{
+    //no dynamic memory was allocated
+}
+
+void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const cv::Mat &rgb, const cv::Mat &depth)
 {
     segmentHand(mask,region,depth);
+}
+
+void EasyHandSegmentation::init()
+{
+    _pixels.clear();
 }
 
 void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const cv::Mat &depth)
@@ -24,28 +37,28 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
 
     mask.setTo(EasyHandSegmentation::EMPTY);
 
-    point nearestPixel = searchNearestPixel(region,depth);
-    if (point.first < 0){
+    point current = searchNearestPixel(region,depth);
+    if (current.first < 0){
         region.isIni = false;
         return;
     }
 
     //calculate the number of pixels depending on the distance from the KINECT
-    int maxHandSize = _maxHandSizeCoeff/minval+1;
+    int rowcount = depth.rows, colcount = depth.cols;
 
     //queue can be much smaller, but it is to be on the safe side
-    FastQueue<point > pixels(maxHandSize);
-    point current;
-    double mean = minval;
+    //allocate it once?
+    _pixels.clear();
+    double mean = depth.at<unsigned short>(current.first,current.second);
     int minx=depth.cols,miny=depth.rows,maxx=0,maxy=0,minz = pow(2,15),maxz = 0;
     unsigned short dv = 0;
     int pixelcount = 1;
-    pixels.push(nearestPixel);
+    _pixels.push(current);
 
-    while(!pixels.empty() & pixelcount < maxHandSize)
+    while(!_pixels.empty() & pixelcount < _maxObjectSize)
     {
-        current = pixels.front();
-        pixels.pop();
+        current = _pixels.front();
+        _pixels.pop();
 
         dv = depth.at<unsigned short>(current.first,current.second);
 
@@ -67,7 +80,7 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
                     pixelcount++;
                     mean += depth.at<unsigned short>(current.first + 1,current.second + 1 );
                     mask.at<uchar>(current.first + 1,current.second + 1 ) = EasyHandSegmentation::HAND;
-                    pixels.push(point(current.first + 1,current.second + 1));
+                    _pixels.push(point(current.first + 1,current.second + 1));
                 }
             }
 
@@ -80,7 +93,7 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
                     pixelcount++;
                     mean += depth.at<unsigned short>(current.first + 1,current.second - 1 );
                     mask.at<uchar>(current.first + 1,current.second - 1 ) = EasyHandSegmentation::HAND;
-                    pixels.push(point(current.first + 1,current.second - 1));
+                    _pixels.push(point(current.first + 1,current.second - 1));
                 }
             }
         }
@@ -96,7 +109,7 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
                     pixelcount++;
                     mean += depth.at<unsigned short>(current.first - 1,current.second + 1 );
                     mask.at<uchar>(current.first - 1,current.second + 1 ) = EasyHandSegmentation::HAND;
-                    pixels.push(point(current.first - 1,current.second + 1));
+                    _pixels.push(point(current.first - 1,current.second + 1));
                 }
             }
 
@@ -109,7 +122,7 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
                     pixelcount++;
                     mean += depth.at<unsigned short>(current.first - 1,current.second - 1 );
                     mask.at<uchar>(current.first - 1,current.second - 1 ) = EasyHandSegmentation::HAND;
-                    pixels.push(point(current.first - 1,current.second - 1));
+                    _pixels.push(point(current.first - 1,current.second - 1));
                 }
             }
         }
@@ -130,7 +143,7 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
     }
 }
 
-point EasyHandSegmentation::searchNearestPixel(const cv::Rect3D &region, const cv::Mat &depth)
+EasyHandSegmentation::point EasyHandSegmentation::searchNearestPixel(const cv::Rect3D &region, const cv::Mat &depth)
 {
 
     const unsigned short *depthptr;
@@ -139,13 +152,13 @@ point EasyHandSegmentation::searchNearestPixel(const cv::Rect3D &region, const c
     point result(-1,-1);
 
     //search for nearest pixel
-    for(int i=region.y; i<region.y+region.height; i++)
+    for(int i=region.y; i< (region.y+region.height); i++)
     {
         depthptr = depth.ptr<const unsigned short>(i);
 
-        for(int j=region.x; j<region.x+region.width; j++)
+        for(int j=region.x; j<(region.x+region.width); j++)
         {
-            if(depthptr[j]>=region.z & depthptr[j] <= upperBoundary & depthptr[j]<minval)
+            if(depthptr[j]>region.z & depthptr[j] <= upperBoundary & depthptr[j]<minval)
             {
                 minval = depthptr[j];
                 result.first = i;

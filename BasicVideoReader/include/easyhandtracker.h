@@ -11,9 +11,11 @@ class EasyHandTracker: public HandTracker
 
 public:
     EasyHandTracker();
+    ~EasyHandTracker();
 
     void init();
-    bool track(cv::Mat &Mask, const cv::Mat &depth, const cv::Mat &rgb);
+    void init(cv::Mat &mask);
+    bool track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat &rgb);
 
     void setDistanceThreashold(int delta)
     {
@@ -21,10 +23,11 @@ public:
     }
 
 private:
-    Rect3D _position;
+    cv::Rect3D _position;
     HandSegmentation *_segmentator;
 
     int _delta;
+    bool _isLost;
 };
 
 #endif // EASYHANDTRACKER_H
