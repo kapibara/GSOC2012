@@ -10,6 +10,8 @@ EasyHandSegmentation::EasyHandSegmentation(int maxObjectSize):_pixels(maxObjectS
 
     _maxObjectSize = maxObjectSize;
     _depthThr = 50;
+    _lt = 0;
+    _ut = pow(2,14);
 }
 
 EasyHandSegmentation::~EasyHandSegmentation()
@@ -43,11 +45,8 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
         return;
     }
 
-    //calculate the number of pixels depending on the distance from the KINECT
     int rowcount = depth.rows, colcount = depth.cols;
 
-    //queue can be much smaller, but it is to be on the safe side
-    //allocate it once?
     _pixels.clear();
     double mean = depth.at<unsigned short>(current.first,current.second);
     int minx=depth.cols,miny=depth.rows,maxx=0,maxy=0,minz = pow(2,15),maxz = 0;
@@ -69,77 +68,50 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
         if (dv < minz) minz = dv;
                 else if (dv > maxz) maxz = dv;
 
-        if ( current.first + 1 < rowcount )
-        {
-            if ( current.second + 1 < colcount )
-            {
-                if ( mask.at<uchar>(current.first + 1,current.second + 1 ) == EasyHandSegmentation::EMPTY &
-                     fabs(depth.at<unsigned short>(current.first + 1,current.second + 1 )-mean/pixelcount) < _depthThr
-                     & depth.at<unsigned short>(current.first + 1,current.second + 1 ) > 0)
-                {
-                    pixelcount++;
-                    mean += depth.at<unsigned short>(current.first + 1,current.second + 1 );
-                    mask.at<uchar>(current.first + 1,current.second + 1 ) = EasyHandSegmentation::HAND;
-                    _pixels.push(point(current.first + 1,current.second + 1));
-                }
-            }
-
-            if( current.second - 1 > -1 )
-            {
-                if ( mask.at<uchar>(current.first + 1,current.second - 1 ) == EasyHandSegmentation::EMPTY &
-                     fabs(depth.at<unsigned short>(current.first + 1,current.second - 1 )-mean/pixelcount) < _depthThr
-                     & depth.at<unsigned short>(current.first + 1,current.second + 1 ) > 0)
-                {
-                    pixelcount++;
-                    mean += depth.at<unsigned short>(current.first + 1,current.second - 1 );
-                    mask.at<uchar>(current.first + 1,current.second - 1 ) = EasyHandSegmentation::HAND;
-                    _pixels.push(point(current.first + 1,current.second - 1));
-                }
-            }
+        if ( current.first + 1 < rowcount ){
+            processNeighbor(pixelcount,mean,mask,current.first + 1,current.second,depth);
         }
 
-        if ( current.first - 1 > -1 )
-        {
-            if ( current.second + 1 < colcount )
-            {
-                if ( mask.at<uchar>(current.first - 1,current.second + 1 ) == EasyHandSegmentation::EMPTY &
-                     fabs(depth.at<unsigned short>(current.first - 1,current.second + 1 )-mean/pixelcount) < _depthThr
-                     & depth.at<unsigned short>(current.first - 1,current.second + 1 ) > 0)
-                {
-                    pixelcount++;
-                    mean += depth.at<unsigned short>(current.first - 1,current.second + 1 );
-                    mask.at<uchar>(current.first - 1,current.second + 1 ) = EasyHandSegmentation::HAND;
-                    _pixels.push(point(current.first - 1,current.second + 1));
-                }
-            }
-
-            if( current.second - 1 > -1 )
-            {
-                if ( mask.at<uchar>(current.first - 1,current.second - 1 ) == EasyHandSegmentation::EMPTY &
-                     fabs(depth.at<unsigned short>(current.first - 1,current.second - 1 )-mean/pixelcount) < _depthThr
-                     & depth.at<unsigned short>(current.first - 1,current.second - 1 ) > 0)
-                {
-                    pixelcount++;
-                    mean += depth.at<unsigned short>(current.first - 1,current.second - 1 );
-                    mask.at<uchar>(current.first - 1,current.second - 1 ) = EasyHandSegmentation::HAND;
-                    _pixels.push(point(current.first - 1,current.second - 1));
-                }
-            }
+        if ( current.first - 1 > -1 ){
+            processNeighbor(pixelcount,mean,mask,current.first - 1,current.second,depth);
         }
+
+        if ( current.second + 1 < colcount ){
+            processNeighbor(pixelcount,mean,mask,current.first,current.second + 1,depth);
+        }
+
+        if( current.second - 1 > -1 ){
+            processNeighbor(pixelcount,mean,mask,current.first,current.second - 1,depth);
+        }
+
     }
 
+    region.width = maxy - miny; //cols range
+    region.height = maxx - minx; //rows range
 
-
-    if(region.width<0)
+    if(region.width<=0 | region.height <=0){
         region.isIni = false;
+    }
     else{
+        region.isIni = true;
         region.x = miny; //cols
         region.y = minx; //rows
         region.z = minz;
-        region.width = maxy - miny; //cols range
-        region.height = maxx - minx; //rows range
         region.depth = maxz - minz;
-        region.isIni = true;
+    }
+}
+
+bool EasyHandSegmentation::processNeighbor(int &pixelcount, double &mean, cv::Mat &mask, const short first, const short second, const cv::Mat &depth)
+{
+    unsigned short d = depth.at<unsigned short>(first,second );
+
+    if ( mask.at<uchar>(first,second ) == EasyHandSegmentation::EMPTY &
+         fabs(d-mean/pixelcount) < _depthThr & d > _lt & d <= _ut)
+    {
+        pixelcount++;
+        mean += d;
+        mask.at<uchar>(first,second ) = EasyHandSegmentation::HAND;
+        _pixels.push(point(first,second));
     }
 }
 
@@ -147,9 +119,16 @@ EasyHandSegmentation::point EasyHandSegmentation::searchNearestPixel(const cv::R
 {
 
     const unsigned short *depthptr;
+    int lowerBoundary = region.z;
     int upperBoundary = region.z + region.depth;
     unsigned short minval = pow(2,15); //not nessecerely maximum, but not minimum for sure
     point result(-1,-1);
+
+    if (region.z < _lt)
+        lowerBoundary = _lt;
+
+    if (upperBoundary > _ut)
+        upperBoundary = _ut;
 
     //search for nearest pixel
     for(int i=region.y; i< (region.y+region.height); i++)
@@ -158,7 +137,7 @@ EasyHandSegmentation::point EasyHandSegmentation::searchNearestPixel(const cv::R
 
         for(int j=region.x; j<(region.x+region.width); j++)
         {
-            if(depthptr[j]>region.z & depthptr[j] <= upperBoundary & depthptr[j]<minval)
+            if(depthptr[j]> lowerBoundary & depthptr[j] <= upperBoundary & depthptr[j]<minval)
             {
                 minval = depthptr[j];
                 result.first = i;

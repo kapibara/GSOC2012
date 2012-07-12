@@ -1,8 +1,12 @@
 #ifndef EXTRACTCONTOUR_H
 #define EXTRACTCONTOUR_H
 
+#include <vector>
+#include <opencv2/opencv.hpp>
+
 //void extractContour(std::vector<cv::Point> &hand, const cv::Mat &input);
 
-#include <../src/extractContour.cpp>
+void extractContour(std::vector<cv::Point> &hand, cv::Mat &image);
+
 
 #endif // EXTRACTCONTOUR_H

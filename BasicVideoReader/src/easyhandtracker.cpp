@@ -1,4 +1,5 @@
 #include "easyhandtracker.h"
+#include "easyhanddetector.h"
 #include "easyhandsegmentation.h"
 
 #include <iostream>
@@ -9,6 +10,7 @@ using namespace std;
 EasyHandTracker::EasyHandTracker()
 {
     _delta = 20;
+    _detector = new EasyHandDetector(100,1000); //close-range detector; values are in mm
     _segmentator = new EasyHandSegmentation();
 }
 
@@ -21,12 +23,14 @@ void EasyHandTracker::init()
 {
     _position.isIni = false;
     _isLost = false;
+    _isDetected = false;
     _segmentator->init();
+    _detector->reset();
 }
 
 void EasyHandTracker::init(cv::Mat &mask)
 {
-
+//implement!
 }
 
 bool EasyHandTracker::track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat &rgb)
@@ -43,17 +47,25 @@ bool EasyHandTracker::track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat &
     CV_Assert(mask.rows == depth.rows);
     CV_Assert(mask.cols == depth.cols);
 
+    //starting from here we have some idea about position
     mask.setTo(0);
 
-    //cut a part of depth image - hand can not move too fast
-    if(!(_position.isIni))
+
+    if(!_position.isIni)
     {
-        _position = Rect3D(0,0,0,mask.size().width,mask.size().height,pow(2,15));
+        //hand was not detected from previous frames
+        if(!_detector->detect(_position,depth,rgb)){
+            //no hand detected
+            return false;
+        }else{
+            _detector->reset();
+            _isDetected = true;
+        }
     }
 
     _segmentator->segmentHand(mask,_position,depth);
 
-    if (!_position.isIni){
+    if (_isDetected & !_position.isIni){
         _isLost = true;
         return false;
     }
@@ -67,11 +79,15 @@ bool EasyHandTracker::track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat &
     _position.depth = _position.depth + 2*_delta;
     _position.isIni = true;
 
-    rectangle(mask,Rect(_position.x,_position.y,_position.width,_position.height),100);
-/*
-    cout << "frame size: [" << mask.rows << ":" << mask.cols << "]" << endl;
-    cout << "dimensions: [" << _position.x << "," << _position.y << "," << _position.z << "]["
-                           << _position.width << "," << _position.height << "," << _position.depth << "]" << endl;
-*/
+    //rectangle(mask,Rect(_position.x+1,_position.y+1,_position.width-1,_position.height-1),255);
+
     return true;
+}
+
+bool EasyHandTracker::track(cv::Rect3D &position, cv::Mat &mask, const cv::Mat &depth, const cv::Mat &rgb)
+{
+    bool result = track(mask,depth,rgb);
+    position = _position;
+
+    return result;
 }
