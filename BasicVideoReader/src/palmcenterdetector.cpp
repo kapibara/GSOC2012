@@ -12,6 +12,13 @@ PalmCenterDetector::PalmCenterDetector(float timestep):_filter(6,3,0,CV_32FC1)
     _prop = 1.5;
 }
 
+/*
+PalmCenterDetector3D::PalmCenterDetector3D(float timestep):_filter(6,3,0,CV_32FC1)
+{
+    _timestep = timestep;
+    _prop = 1.5;
+}*/
+
 void PalmCenterDetector::reset()
 {
     cout << "timestep: " << _timestep << endl;
@@ -34,6 +41,32 @@ void PalmCenterDetector::reset()
     _filter.processNoiseCov = Mat::eye(6,6,CV_32FC1);
 }
 
+/*
+void PalmCenterDetector3D::reset()
+{
+    cout << "timestep: " << _timestep << endl;
+    _iniCount = 0;
+    _filter.init(8,4,0,CV_32FC1);
+    _filter.transitionMatrix =
+        (Mat_<float>(8,8) <<
+         1, 0, 0, _timestep, 0, 0, 0,
+         0, 1, 0, 0, _timestep, 0, 0,
+         0, 0, 1, 0, 0, _timestep, 0,
+         0, 0, 0, 1, 0, 0, _timestep,
+         0, 0, 0, 0, 1, 0, 0, 0,
+         0, 0, 0, 0, 0, 1, 0, 0,
+         0, 0, 0, 0, 0, 0, 1, 0,
+         0, 0, 0, 0, 0, 0, 0, 1);
+    _filter.measurementMatrix =
+            ((Mat_<float>(4,8)) <<
+            1, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 1, 0, 0, 0, 0, 0,
+            0, 0, 0, 1, 0, 0, 0, 0);
+    _filter.measurementNoiseCov = Mat::eye(4,4,CV_32FC1);
+    _filter.processNoiseCov = Mat::eye(8,8,CV_32FC1);
+}*/
+
 void PalmCenterDetector::computeCenter(Point &maxLoc, double &r, const Mat &mat)
 {
     Mat output(mat.size(),CV_32FC1);
@@ -43,6 +76,17 @@ void PalmCenterDetector::computeCenter(Point &maxLoc, double &r, const Mat &mat)
 
     minMaxLoc(output,0,&r,0,&maxLoc);
 }
+
+/*
+void PalmCenterDetector3D::computeCenter(Point3D &maxLoc, double &r, const Mat &mat)
+{
+    Mat output(mat.size(),CV_32FC1);
+
+    //compute fast distace transform
+    distanceTransform(mat,output,CV_DIST_L2,3);
+
+    minMaxLoc(output,0,&r,0,&maxLoc);
+}*/
 
 void PalmCenterDetector::detect(Point &p, Point &ps, double &r, double &rs, const Rect3D &pos, const Mat &mat)
 {
@@ -68,9 +112,9 @@ void PalmCenterDetector::detect(Point &p, Point &ps, double &r, double &rs, cons
         _iniCount++;
     }
     else{
-
-        double rproportion = 1.5;
         Mat state = _filter.predict();
+
+
         int x = std::max((int)(state.at<float>(0,0)-_prop*state.at<float>(2,0)),0),
             y = std::max((int)(state.at<float>(1,0)-_prop*state.at<float>(2,0)),0),
             width = std::min(2*_prop*state.at<float>(2,0),mat.size().width - (x+_prop*state.at<float>(2,0))-1),
@@ -79,6 +123,7 @@ void PalmCenterDetector::detect(Point &p, Point &ps, double &r, double &rs, cons
         if (width <= 0 | height <= 0 | x < 0 | y < 0 | x + width >= mat.size().width | y + height >= mat.size().height){
             _iniCount = 0;
             reset();
+            return;
         }
 
 
@@ -92,11 +137,71 @@ void PalmCenterDetector::detect(Point &p, Point &ps, double &r, double &rs, cons
 
         //smooth
         state = _filter.correct((Mat_<float>(3,1) << p.x, p.y, r));
+
         ps.x = state.at<float>(0,0);
         ps.y = state.at<float>(1,0);
         rs = state.at<float>(2,0);
     }
 }
+
+/*
+void PalmCenterDetector3D::detect(Point3D &p, Point3D &ps, double &r, double &rs, const Rect3D &pos, const Mat &mask, const Mat &depth)
+{
+    if(_iniCount < 10){
+        //cut mat part and compute EDT on it
+        Rect pos2D(pos.x,pos.y,pos.width,pos.height);
+        Mat patch = mat(pos2D);
+
+        computeCenter(p,r,patch);
+
+        p.x += pos.x;
+        p.y += pos.y;
+
+        p.z = depth.at<unsigned short>(p.x,p.y);
+
+        if (_iniCount == 0){
+            _filter.statePost = (Mat_<float>(6,1) << p.x, p.y, p.z, r, 0, 0, 0, 0);
+        }else{
+            _filter.predict();
+            _filter.correct((Mat_<float>(3,1)<< p.x,p.y,p.z,r));
+        }
+
+        ps = p;
+        rs = r;
+        _iniCount++;
+    }
+    else{
+        Mat state = _filter.predict();
+
+
+        int x = std::max((int)(state.at<float>(0,0)-_prop*state.at<float>(2,0)),0),
+            y = std::max((int)(state.at<float>(1,0)-_prop*state.at<float>(2,0)),0),
+            width = std::min(2*_prop*state.at<float>(2,0),mat.size().width - (x+_prop*state.at<float>(2,0))-1),
+            height = std::min(2*_prop*state.at<float>(2,0),mat.size().height - (y+_prop*state.at<float>(2,0))-1);
+
+        if (width <= 0 | height <= 0 | x < 0 | y < 0 | x + width >= mat.size().width | y + height >= mat.size().height){
+            _iniCount = 0;
+            reset();
+            return;
+        }
+
+        Rect pos2D(x,y,width,height);
+        Mat patch = mat(pos2D);
+
+        computeCenter(p,r,patch);
+
+        p.x += pos2D.x;
+        p.y += pos2D.y;
+        p.z = depth.at<unsigned short>(p.x,p.y);
+
+        //smooth
+        state = _filter.correct((Mat_<float>(3,1) << p.x, p.y, r));
+
+        ps.x = state.at<float>(0,0);
+        ps.y = state.at<float>(1,0);
+        rs = state.at<float>(2,0);
+    }
+}*/
 
 void PalmCenterDetector::checkState(Mat &state, int width, int height){
     state.at<float>(0,0) = max(state.at<float>(0,0),_prop*state.at<float>(2,0)+1);
