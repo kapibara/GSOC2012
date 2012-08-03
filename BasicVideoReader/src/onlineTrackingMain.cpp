@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <opencv2/opencv.hpp>
 
 #include "easyhandtracker.h"
@@ -14,7 +15,13 @@ using namespace std;
 void saveTips(const string &filename,const vector<cv::Point> &tips)
 {
 
+    ofstream output(filename.c_str());
 
+    output << "x,y" << endl;
+
+    for(int i=0; i<tips.size(); i++){
+        output << tips[i].x << "," << tips[i].y << endl;
+    }
 }
 
 void copyTo3Chanels(Mat &output,const Mat &input)
@@ -79,19 +86,27 @@ int main(int argc, char **argv)
         stringstream ss;//create a stringstream
         string filebase("output");
         PalmCenterDetector pdetector;
+        PalmCenterDetector pdetectorR;
         ContourBasedFingerDetector fd;
+        stringstream info;
         TrackDrawer drawer;
-        TrackDrawer noFilterDrawer;
-        Point p,ps;
-        double r,rs;
+        //TrackDrawer noFilterDrawer;
+        TrackDrawer robustDrawer;
+        Point ps;
+        double rs;
         bool trackerResult;
         tracker.init();
         int i=0;
 
         pdetector.reset();
-
+        pdetector.setUseRobust(false);
         drawer.setColor(Scalar(0,255,0));
-        noFilterDrawer.setColor(Scalar(0,0,255));
+
+        pdetectorR.reset();
+        robustDrawer.setColor(Scalar(255,0,0));
+
+        //noFilterDrawer.setColor(Scalar(0,0,255));
+
 
         while(true)
         {
@@ -106,41 +121,54 @@ int main(int argc, char **argv)
 
             i = (i+1)%10;
 
-
             if(trackerResult=tracker.track(position,mask,depthMap,rgbImage)){
                 //perform morphology
-                Morphology::close(opened,mask,5);
+                Morphology::open(opened,mask,5);
+                mask.setTo(0);
+                Morphology::close(mask,opened,5);
 
-                copyTo3Chanels(toDisplay,opened);
+                copyTo3Chanels(toDisplay,mask);
+                //toDisplay.setTo(0);
 
-                pdetector.detect(p,ps,r,rs,position,opened);
-
-                circle(toDisplay,ps,rs,Scalar(0,0,255));
-
+                /*KF*/
+                pdetector.detect(ps,rs,position,mask);
                 drawer.drawTrack(toDisplay,ps);
-                noFilterDrawer.drawTrack(toDisplay,p);
+                circle(toDisplay,ps,rs,Scalar(0,255,0));
+
+                /*KF + make-it-more-robust*/
+                pdetectorR.detect(ps,rs,position,mask);
+                robustDrawer.drawTrack(toDisplay,ps);
+
+                circle(toDisplay,ps,rs,Scalar(255,0,0));
             }
 
             if(trackerResult){
                 tips.clear();
 
-                fd.detectFingerTips(tips,position,opened);
+                fd.detectFingerTips(tips,position,mask);
 
-                for(int i=0; i<tips.size(); i++){
-                    circle(toDisplay,tips[i],2,Scalar(0,255,0));
+                if(!tips.empty()){
+
+                    for(int i=0; i<tips.size(); i++){
+                        circle(toDisplay,tips[i],2,Scalar(255,0,0));
+                    }
+
+                    tips.clear();
+
+                    fd.locateFingerTips(tips,position);
+
+                    for(int i=0; i<tips.size(); i++){
+                        circle(toDisplay,tips[i],10,Scalar(0,0,255));
+                    }
+
+                    info.seekp(0);
+                    info.str("");
+                    info << "fingers: " << tips.size() << endl;
+
+                    putText(toDisplay,info.str(),Point(depthMap.size().width*0.75,depthMap.size().height*0.75),FONT_HERSHEY_PLAIN,1,Scalar(100,100,100));
                 }
 
-                //tips.clear();
-
-                //fd.rejectNonFingers(tips,position);
-
-                //cout << "number of remaining finger tips: " << tips.size() << endl;
-
-                //for(int i=0; i<tips.size(); i++){
-                //    circle(rgbImage,tips[i],2,Scalar(0,0,255));
-                //}
             }
-
 
             if(trackerResult){
                 rectangle(toDisplay,Rect(position.x,position.y,position.width,position.height),Scalar(255,0,0));
@@ -152,10 +180,15 @@ int main(int argc, char **argv)
             key = waitKey(10);
             if (key == 'q')
                 break;
+
             if (key == 's'){
                 tracker.init();
+
                 pdetector.reset();
                 drawer.reset();
+
+                robustDrawer.reset();
+                pdetectorR.reset();
             }
 
             if (key == 'd'){
@@ -164,6 +197,7 @@ int main(int argc, char **argv)
 
                 ss.seekp(0);
                 ss << saveCount;
+                //saveTips("tips"+ss.str()+".txt",tips);
                 fd.saveContour(filebase+ss.str()+".txt");
                 saveCount++;
             }

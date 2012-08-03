@@ -9,7 +9,7 @@ EasyHandSegmentation::EasyHandSegmentation(int maxObjectSize):_pixels(maxObjectS
     CV_Assert(maxObjectSize>0);
 
     _maxObjectSize = maxObjectSize;
-    _depthThr = 50;
+    _depthThr = 40;
     _lt = 0;
     _ut = pow(2,14);
 }
@@ -51,6 +51,7 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
     double mean = depth.at<unsigned short>(current.first,current.second);
     int minx=depth.cols,miny=depth.rows,maxx=0,maxy=0,minz = pow(2,15),maxz = 0;
     unsigned short dv = 0;
+    int depthMinDiff = 50;
     int pixelcount = 1;
     _pixels.push(current);
 
@@ -98,6 +99,9 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
         region.y = minx; //rows
         region.z = minz;
         region.depth = maxz - minz;
+        if(region.depth < depthMinDiff){
+            region.depth = depthMinDiff;
+        }
     }
 }
 

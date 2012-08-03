@@ -62,6 +62,7 @@ bool KalmanHandTracker::track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat
 {
     if(_isLost){
         cerr << "WARNING: tracker lost the object; reinitialize" << endl;
+        cerr << "position: " <<  _position << endl;
         return false;
     }
 
@@ -97,6 +98,7 @@ bool KalmanHandTracker::track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat
     _segmentator->segmentHand(mask,_position,depth);
 
     if (_isDetected & !_position.isIni){
+        cerr << "position: " <<  _position << endl;
         _isLost = true;
         return false;
     }

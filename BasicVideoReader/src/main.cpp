@@ -75,6 +75,7 @@ int main(int argc, char **argv)
         PalmCenterDetector pdetector;
         ContourBasedFingerDetector fd;
         Mat morph(Size(frameWidth,frameHeight),CV_8UC1);
+        Mat edt(Size(frameWidth,frameHeight),CV_32FC1);
         Rect3D position;
         TrackDrawer drawer, drawerS;
         ofstream stream("contours.txt");
@@ -108,13 +109,15 @@ int main(int argc, char **argv)
 
                 trackerResult = tracker.track(position,handMask,imageDepth,imageRGB);
 
+                distanceTransform(handMask,edt,CV_DIST_L2,3);
+
                 if (tracker.isTracking() & !trackerResult){
                     cout << "Track lost!" << endl;
                     //exit(0);
                 }
 
                 if (trackerResult){
-                    pdetector.detect(p,ps,r,rs,position,handMask);
+                    pdetector.detect(ps,rs,position,handMask);
                     cout << "p: " << p << "ps: " << ps << endl;
                     circle(imageRGB,p,r,Scalar(0,0,200));
                     circle(imageRGB,ps,rs,Scalar(0,200,0));
@@ -125,7 +128,6 @@ int main(int argc, char **argv)
                 tips.clear();
 
                 Morphology::erode(morph,handMask,2);
-
 
                 if(trackerResult){
                     fd.detectFingerTips(tips,position,morph);  
@@ -138,7 +140,7 @@ int main(int argc, char **argv)
 
                     tips.clear();
 
-                    fd.rejectNonFingers(tips,position);
+                    //fd.rejectNonFingers(tips,position);
                 }
                 if (fd.isInitialized() && trackerResult){
                     sim = fd.compareToTemplate(handMask);
@@ -152,6 +154,7 @@ int main(int argc, char **argv)
                 //imshow("Depth",imageDepth);
                 imshow("RGB",imageRGB);
                 imshow("hand mask", handMask);
+                imshow("edt",edt);
 
                 key = waitKey(10);
 

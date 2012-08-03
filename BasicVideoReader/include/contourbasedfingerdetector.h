@@ -19,7 +19,8 @@ public:
     bool isInitialized() {return (_template.size()>0);}
     void saveContour(const std::string &filename);
     void detectFingerTips(std::vector<cv::Point> &tips, const cv::Rect3D &location, const cv::Mat &mask);
-    void rejectNonFingers(std::vector<cv::Point> &realTips, const cv::Rect3D &location);
+    void locateFingerTips(std::vector<cv::Point> &tips, const cv::Rect3D &location);
+//    void rejectNonFingers(std::vector<cv::Point> &realTips, const cv::Rect3D &location);
 
 private:
     bool pixelwiseContourTracking(std::vector<cv::Point> &contour,const cv::Rect3D &location, const cv::Mat &mask);
