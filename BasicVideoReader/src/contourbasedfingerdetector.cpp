@@ -12,6 +12,9 @@ using namespace cv;
 
 ContourBasedFingerDetector::ContourBasedFingerDetector()
 {
+    _cosThr = -0.01;
+    _scalesCount = 20;
+    _sqrDistance = 2500;
 }
 
 ContourBasedFingerDetector::~ContourBasedFingerDetector()
@@ -65,14 +68,14 @@ void ContourBasedFingerDetector::detectFingerTipsSuggestions(std::vector<cv::Poi
 
     if (outerContour >= 0){
         _contour = contours[outerContour];
-        int scaleLength = 20, contourLength = _contour.size();
+        int scaleLength = _scalesCount, contourLength = _contour.size();
         int scales[scaleLength];
 
         queue<int> locmins[scaleLength];
         int first,start;
         int minidx;
         Point pp, pn;
-        double pnorm,nnorm,cos,sin,minvalue,firstminvalue,thr = -0.1;
+        double pnorm,nnorm,cos,sin,minvalue,firstminvalue,thr = _cosThr;
         int pNi,nNi;
 
         //set up scales
@@ -197,7 +200,7 @@ void ContourBasedFingerDetector::locateFingerTips(vector<Point> &tips)
 
 void ContourBasedFingerDetector::orderFingerTips(std::vector<cv::Point> &tips, const cv::Point &palmCenter)
 {
-    int distanceThr = 2500;
+    int distanceThr = _sqrDistance;
     int minDist,cc,cDist;
 
     vector<pair<int,int> > correspondence;

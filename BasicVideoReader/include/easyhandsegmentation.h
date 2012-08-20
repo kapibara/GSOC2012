@@ -16,12 +16,16 @@ public:
     EasyHandSegmentation(int maxObjectSize = 100000);
     ~EasyHandSegmentation();
     void init();
+
     void setDepthThreashold(const short lowerT, const short upperT)
     {
         CV_Assert(lowerT < upperT);
 
         _lt = lowerT;
         _ut = upperT;
+    }
+    void setMaxObjectSize(int maxObjectSize){
+        _maxObjectSize = maxObjectSize;
     }
 
     void segmentHand(cv::Mat &mask, cv::Rect3D &region,  const cv::Mat &rgb, const cv::Mat &depth);

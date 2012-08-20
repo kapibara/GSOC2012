@@ -131,12 +131,6 @@ int main(int argc, char **argv)
             cout << capture.retrieve( rgbImage, CV_CAP_OPENNI_BGR_IMAGE ) << endl;
             cout << capture.retrieve( depthMap, CV_CAP_OPENNI_DEPTH_MAP ) << endl;
 
-            cout << "depth map type" << (depthMap.type() == CV_16UC1) << endl;
-
-            cout << "i=" << i<< endl;
-
-            i = (i+1)%10;
-
             if(trackerResult=tracker.track(position,mask,depthMap,rgbImage)){
                 //perform morphology
                 Morphology::open(opened,mask,3);

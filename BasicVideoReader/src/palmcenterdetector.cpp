@@ -12,6 +12,7 @@ PalmCenterDetector::PalmCenterDetector(float timestep):_filter(6,3,0,CV_32FC1)
     _prop = 1.5;
     _useRobust = true;
     _lastPosition = Point(0,0);
+    _accThr = 10;
 }
 
 void PalmCenterDetector::reset()
@@ -108,7 +109,7 @@ void PalmCenterDetector::detect(Point &ps, double &rs, const Mat &patch)
 {
     ps.x = ps.y = 0;
 
-    if(_iniCount <= 10){
+    if(_iniCount <= _accThr){
 
         if (_useRobust == false | _lastPosition.x < 0 | _lastPosition.y < 0 | _lastPosition.x >= patch.size().width | _lastPosition.y >= patch.size().height)
         {
@@ -130,12 +131,10 @@ void PalmCenterDetector::detect(Point &ps, double &rs, const Mat &patch)
     else{
         Mat state = _filter.predict();
 
-        float zoomFactor = 2;
-
         int x = std::max((int)(state.at<float>(0,0)-_prop*state.at<float>(2,0)),0),
             y = std::max((int)(state.at<float>(1,0)-_prop*state.at<float>(2,0)),0),
-            width = std::min(zoomFactor*_prop*state.at<float>(2,0),patch.size().width - (x+_prop*state.at<float>(2,0))-1),
-            height = std::min(zoomFactor*_prop*state.at<float>(2,0),patch.size().height - (y+_prop*state.at<float>(2,0))-1);
+            width = std::min(2*_prop*state.at<float>(2,0),patch.size().width - (x+_prop*state.at<float>(2,0))-1),
+            height = std::min(2*_prop*state.at<float>(2,0),patch.size().height - (y+_prop*state.at<float>(2,0))-1);
 
         if (width <= 0 | height <= 0 | x < 0 | y < 0 | x + width >= patch.size().width | y + height >= patch.size().height){
             _iniCount = 0;
@@ -167,7 +166,7 @@ void PalmCenterDetector::detect(Point &ps, double &rs, const Rect3D &pos, const 
     Rect pos2D(pos.x,pos.y,pos.width,pos.height);
     Mat patch = mat(pos2D);
 
-    if(_iniCount < 10){
+    if(_iniCount < _accThr){
         //cut mat part and compute EDT on it
 
         Point oldPoint = _lastPosition-Point(pos.x,pos.y);
@@ -194,13 +193,11 @@ void PalmCenterDetector::detect(Point &ps, double &rs, const Rect3D &pos, const 
     else{
         Mat state = _filter.predict();
 
-        float zoomFactor = 2;
-
         //translate predicted position in relative coordinates
         int x = std::max((int)(state.at<float>(0,0)-_prop*state.at<float>(2,0))-pos.x,0),
             y = std::max((int)(state.at<float>(1,0)-_prop*state.at<float>(2,0))-pos.y,0),
-            width = std::min(zoomFactor*_prop*state.at<float>(2,0),patch.size().width - (x+_prop*state.at<float>(2,0))-1),
-            height = std::min(zoomFactor*_prop*state.at<float>(2,0),patch.size().height - (y+_prop*state.at<float>(2,0))-1);
+            width = std::min(2*_prop*state.at<float>(2,0),patch.size().width - (x+_prop*state.at<float>(2,0))-1),
+            height = std::min(2*_prop*state.at<float>(2,0),patch.size().height - (y+_prop*state.at<float>(2,0))-1);
 
         if (width <= 0 | height <= 0 | x < 0 | y < 0 | x + width >= patch.size().width | y + height >= patch.size().height){
             _iniCount = 0;

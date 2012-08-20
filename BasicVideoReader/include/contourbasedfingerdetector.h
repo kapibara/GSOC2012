@@ -17,6 +17,10 @@ public:
         _orderedTips.clear();
     }
 
+    void setNumberOfScales(int scalesCount) {_scalesCount=scalesCount;}
+    void setMinCosAllowed(float minCos) {_cosThr =  minCos;}
+    void setSqrDistance(int sqrDistance) {_sqrDistance = sqrDistance;}
+
     void saveContour(const std::string &filename);
     void detectFingerTipsSuggestions(std::vector<cv::Point> &tips, const cv::Mat &patch);
     void locateFingerTips(std::vector<cv::Point> &tips);
@@ -31,6 +35,12 @@ private:
     std::vector<int> _ids;
     std::vector<cv::Point> _orderedTips;
     cv::Size _patchSize;
+
+    int _scalesCount;
+    float _cosThr;
+    int _sqrDistance;
 };
 
 #endif // CONTOURBASEDFINGERDETECTOR_H
+
+

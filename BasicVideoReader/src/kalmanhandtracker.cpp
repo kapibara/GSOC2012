@@ -20,11 +20,13 @@ using namespace std;
 
 /*TODO: _isDetectedCount can probabli replace _isDetected*/
 
-KalmanHandTracker::KalmanHandTracker(float timestep): _filter(6,3,0,CV_32FC1),CUMTHRESH(10)
+KalmanHandTracker::KalmanHandTracker(float timestep): _filter(6,3,0,CV_32FC1)
 {
     _segmentator = new EasyHandSegmentation();
     _detector = new EasyHandDetector();
     _timestep = timestep;
+    _minInterval = 50;
+    _accThr = 10;
 }
 
 KalmanHandTracker::~KalmanHandTracker()
@@ -114,7 +116,7 @@ bool KalmanHandTracker::track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat
     //correct the position with current measurement
     Mat toDisplay = _filter.correct((Mat_<KFtype>(3,1) << center.x,center.y,center.z));
 
-    if (_isDetectedCount>CUMTHRESH){
+    if (_isDetectedCount>_accThr){
         //correct and predict if we already saw some measurements
         correctPosition(toDisplay,mask.size().width, mask.size().height);
     }else{
@@ -127,7 +129,7 @@ bool KalmanHandTracker::track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat
     //predict position in the next frame
     toDisplay = _filter.predict();
 
-    if (_isDetectedCount>CUMTHRESH){
+    if (_isDetectedCount>_accThr){
         //correct and predict if we already saw some measurements
         correctPosition(toDisplay,mask.size().width, mask.size().height);
     }else{
@@ -158,6 +160,12 @@ void KalmanHandTracker::correctPosition(const cv::Mat &correction, int width, in
     _position.y = min(_position.y,height-1);
     _position.width = min(_position.width,width - _position.x - 1);
     _position.height = min(_position.height,height - _position.y - 1);
+
+    if (_position.depth < _minInterval){
+        _position.z = max(1, _position.z + _position.depth/2 - _minInterval /2);
+        _position.depth = min(_minInterval, _position.z + _minInterval /2);
+    }
+
 }
 
 bool KalmanHandTracker::track(cv::Rect3D &position, cv::Mat &mask, const cv::Mat &depth, const cv::Mat &rgb)

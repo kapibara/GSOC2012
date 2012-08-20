@@ -51,6 +51,7 @@ int main(int argc, char **argv)
     try
     {
         VideoCapture capture( CV_CAP_OPENNI );
+        VideoWriter writer("testoutput.avi");
 
         Mat depthMap;
         Mat rgbImage;
@@ -141,6 +142,7 @@ int main(int argc, char **argv)
             ball.draw(toDisplay);
 
             imshow("RGBImg",toDisplay);
+            writer << toDisplay;
 
             key = waitKey(10);
 

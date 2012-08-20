@@ -12,6 +12,10 @@ public:
     KalmanHandTracker(float timestep = 1.0/30.0);
 
     ~KalmanHandTracker();
+
+    void setAccThr(int accThr) {_accThr = accThr;}
+    void setMinInterval(int minInterval) {_minInterval = minInterval;}
+
     void init();
     void init(cv::Mat &mask);
     bool track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat &rgb);
@@ -34,12 +38,14 @@ private:
     cv::Rect3D _position;
     cv::Rect3D _oldPosition;
 
-    const int CUMTHRESH;
+    int _accThr;
 
     bool _isLost;
     bool _isDetected;
     int _isDetectedCount;
     float _timestep;
+
+    int _minInterval;
 
 };
 
