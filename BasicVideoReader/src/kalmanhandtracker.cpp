@@ -73,6 +73,9 @@ bool KalmanHandTracker::track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat
     CV_Assert(mask.rows == depth.rows);
     CV_Assert(mask.cols == depth.cols);
 
+    //Rect3D position
+    _oldPosition = _position;
+
     //starting from here we have some idea about position
     mask.setTo(0);
 

@@ -130,7 +130,7 @@ int main(int argc, char **argv)
                 Morphology::erode(morph,handMask,2);
 
                 if(trackerResult){
-                    fd.detectFingerTips(tips,position,morph);  
+                    //fd.detectFingerTips(tips,position,morph);
 
                     cout << "number of finger tips: " << tips.size() << endl;
 
@@ -142,11 +142,7 @@ int main(int argc, char **argv)
 
                     //fd.rejectNonFingers(tips,position);
                 }
-                if (fd.isInitialized() && trackerResult){
-                    sim = fd.compareToTemplate(handMask);
-                    cout << "Similarity value: " << sim << endl;
 
-                }
 
                 //cout << "Opening!" << endl;
                 //Morphology::close(morph,handMask,1);

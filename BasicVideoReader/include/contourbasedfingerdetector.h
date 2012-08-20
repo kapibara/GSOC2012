@@ -13,23 +13,24 @@ public:
     ContourBasedFingerDetector();
     ~ContourBasedFingerDetector();
 
-    bool extractContour(std::vector<cv::Point> &contour,cv::Mat &mask,bool simplifyContour = false);
-    bool initTemplate(cv::Mat &mask,bool simplifyContour = false);
-    double compareToTemplate(cv::Mat &mask);
-    bool isInitialized() {return (_template.size()>0);}
+    void reset() {
+        _orderedTips.clear();
+    }
+
     void saveContour(const std::string &filename);
-    void detectFingerTips(std::vector<cv::Point> &tips, const cv::Rect3D &location, const cv::Mat &mask);
-    void locateFingerTips(std::vector<cv::Point> &tips, const cv::Rect3D &location);
-//    void rejectNonFingers(std::vector<cv::Point> &realTips, const cv::Rect3D &location);
+    void detectFingerTipsSuggestions(std::vector<cv::Point> &tips, const cv::Mat &patch);
+    void locateFingerTips(std::vector<cv::Point> &tips);
+    void orderFingerTips(std::vector<cv::Point> &tips, const cv::Point &palmCenter);
+    const std::vector<cv::Point> & getOrderedTips(){
+        return _orderedTips;
+    }
 
 private:
-    bool pixelwiseContourTracking(std::vector<cv::Point> &contour,const cv::Rect3D &location, const cv::Mat &mask);
 
-    std::vector<cv::Point> _template;
     std::vector<cv::Point> _contour;
     std::vector<int> _ids;
-
-    bool _isSimplified;
+    std::vector<cv::Point> _orderedTips;
+    cv::Size _patchSize;
 };
 
 #endif // CONTOURBASEDFINGERDETECTOR_H

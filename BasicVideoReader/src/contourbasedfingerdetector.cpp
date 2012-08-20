@@ -19,47 +19,6 @@ ContourBasedFingerDetector::~ContourBasedFingerDetector()
 
 }
 
-bool ContourBasedFingerDetector::extractContour(vector<Point> &contour, cv::Mat &mask, bool simplifyContour)
-{
-    CV_Assert(mask.type() == CV_8UC1);
-
-    vector<vector <Point> > contours;
-    int mode = CV_RETR_LIST, method = CV_CHAIN_APPROX_SIMPLE;
-
-    //this function actually changes mask..
-    findContours(mask,contours,mode,method);
-
-    if(contours.size()>0){
-
-        //take a contour with the biggest number of pixels - should be hand
-        int size = contours[0].size(), index = 0;
-
-        for(int i=1; i<contours.size(); i++)
-        {
-
-            if (contours[i].size()>size){
-                size = contours[i].size();
-                index = i;
-            }
-        }
-
-        if (simplifyContour)
-            approxPolyDP(contours[index],contour,2,true);
-        else
-            contour = contours[index];
-    }
-}
-
-bool ContourBasedFingerDetector::initTemplate(cv::Mat &mask, bool simplifyContour)
-{
-    _template.clear();
-
-    extractContour(_template,mask,simplifyContour);
-    _isSimplified =  simplifyContour;
-
-    return (_template.size()>0);
-}
-
 void ContourBasedFingerDetector::saveContour(const string &filename)
 {
     ofstream out(filename.c_str());
@@ -79,31 +38,17 @@ void ContourBasedFingerDetector::saveContour(const string &filename)
     out.close();
 }
 
-double ContourBasedFingerDetector::compareToTemplate(cv::Mat &mask)
-{
-    if(_template.size()==0){
-        cerr << "WARNING: template is not initialized" << endl;
-        return 0;
-    }
-
-    vector <Point> contour;
-    int method = CV_CONTOURS_MATCH_I2;
-
-    extractContour(contour,mask,_isSimplified);
-
-    return matchShapes(contour,_template,method,0);
-}
-
-void ContourBasedFingerDetector::detectFingerTips(std::vector<cv::Point> &tips, const cv::Rect3D &location, const cv::Mat &mask)
+void ContourBasedFingerDetector::detectFingerTipsSuggestions(std::vector<cv::Point> &tips, const cv::Mat &patch)
 {
     //track contour, calculate curvature at different scales...
     //find starting point:in
 
     vector<vector <Point> > contours;
     vector<Vec4i> hierarchy;
-    Mat objectRef = mask(Rect(location.x,location.y,location.width,location.height));
-    Mat object = objectRef.clone();
+    Mat object = patch.clone();
     int mode = CV_RETR_CCOMP,method = CV_CHAIN_APPROX_NONE;
+
+    _patchSize = patch.size();
 
     //find inner and outer contours
     findContours(object,contours,hierarchy,mode,method);
@@ -118,8 +63,6 @@ void ContourBasedFingerDetector::detectFingerTips(std::vector<cv::Point> &tips, 
         }
     }
 
-    cout << "outerContour: " << outerContour << endl;
-
     if (outerContour >= 0){
         _contour = contours[outerContour];
         int scaleLength = 20, contourLength = _contour.size();
@@ -132,9 +75,6 @@ void ContourBasedFingerDetector::detectFingerTips(std::vector<cv::Point> &tips, 
         double pnorm,nnorm,cos,sin,minvalue,firstminvalue,thr = -0.1;
         int pNi,nNi;
 
-        cout << "Contour length: " << _contour.size() << endl;
-        cout << "scales: ";
-
         //set up scales
         for(int i=0; i< scaleLength; i++){
             scales[i]=floor(0.01*contourLength+i*((0.03*contourLength)/scaleLength));
@@ -142,8 +82,6 @@ void ContourBasedFingerDetector::detectFingerTips(std::vector<cv::Point> &tips, 
                 scales[i]=1;
             }
         }
-
-        cout << endl;
 
         for(int i=0; i< scaleLength; i++){
             pNi = contourLength - scales[i] + 1;
@@ -164,7 +102,7 @@ void ContourBasedFingerDetector::detectFingerTips(std::vector<cv::Point> &tips, 
 
                 if(first >= 0 & sin > 0 & cos < thr){
 
-                //state is the same; search min
+                    //state is the same; search min
                     if(cos < minvalue){
                         minvalue = cos;
                         minidx = j;
@@ -172,7 +110,7 @@ void ContourBasedFingerDetector::detectFingerTips(std::vector<cv::Point> &tips, 
                 }
 
                 if(first< 0 & sin > 0 & cos < thr){
-                //state change; start to search for local minimum
+                    //state change; start to search for local minimum
                     first = j;
                     minvalue = cos;
                     minidx = j;
@@ -189,7 +127,7 @@ void ContourBasedFingerDetector::detectFingerTips(std::vector<cv::Point> &tips, 
                     locmins[i].push(minidx);
                     first = -1;
                     minidx = -1;
-                    minvalue = 1; //cos - less then that it is imposible
+                    minvalue = 1; //cos - bigger then that it is imposible
                 }
                 pNi = (pNi + 1)%contourLength;
                 nNi = (nNi + 1)%contourLength;
@@ -210,14 +148,14 @@ void ContourBasedFingerDetector::detectFingerTips(std::vector<cv::Point> &tips, 
         for(int i=0; i<scaleLength; i++){
             while(!locmins[i].empty()){
                 _ids.push_back(locmins[i].front());
-                tips.push_back(_contour[locmins[i].front()]+Point(location.x,location.y));
+                tips.push_back(_contour[locmins[i].front()]);
                 locmins[i].pop();
             }
         }
     }
 }
 
-void ContourBasedFingerDetector::locateFingerTips(vector<Point> &tips, const cv::Rect3D &location)
+void ContourBasedFingerDetector::locateFingerTips(vector<Point> &tips)
 {
     if (!_ids.empty()){
 
@@ -226,11 +164,6 @@ void ContourBasedFingerDetector::locateFingerTips(vector<Point> &tips, const cv:
         int currentElemCount=1;
         vector<int> lengths;
         int thr = 10; //index difference allowed
-
-        //relabel the first class
-        if(_contour.size()-(_ids.back()+1)+_ids.front()<thr){
-
-        }
 
         for(vector<int>::iterator i=(_ids.begin()+1); i!=_ids.end(); i++){
             if ((*i - *(i-1)) < thr){
@@ -248,6 +181,7 @@ void ContourBasedFingerDetector::locateFingerTips(vector<Point> &tips, const cv:
         tips.push_back(currentMean);
         lengths.push_back(currentElemCount);
 
+        //relabel the first class if there is continious segment
         if(_contour.size()-(_ids.back()+1)+_ids.front()<thr){
             tips[0] = tips[0]+tips[tips.size()-1];
             lengths[0] = lengths[0]+lengths[lengths.size()-1];
@@ -255,66 +189,59 @@ void ContourBasedFingerDetector::locateFingerTips(vector<Point> &tips, const cv:
         }
 
         for(int i=0; i<tips.size(); i++){
-            tips[i] = Point(tips[i].x/lengths[i],tips[i].y/lengths[i]) + Point(location.x,location.y);
+            tips[i] = Point(tips[i].x/lengths[i],tips[i].y/lengths[i]);
         }
     }
 }
 
-/*
-void ContourBasedFingerDetector::rejectNonFingers(std::vector<cv::Point> &realTips, const cv::Rect3D &location)
+
+void ContourBasedFingerDetector::orderFingerTips(std::vector<cv::Point> &tips, const cv::Point &palmCenter)
 {
+    int distanceThr = 2500;
+    int minDist,cc,cDist;
 
-    if (_ids.empty() | _contour.empty()){
-        cerr << "contour was not detected! call detectFingerTips first!" << endl;
-    }
+    vector<pair<int,int> > correspondence;
 
-    int count_thr_l = 1;
-    int count_thr_h = 10;
-    int last = _ids[0],length=1,firstlength = (_ids[0]==0 & _ids[_ids.size()-1]== (_contour.size()-1))?0:-1;
-    Point mean,firstmean;
-
-    sort(_ids.begin(),_ids.end());
-
-    mean = _contour[_ids[0]];
-
-    //search for intervals
-    for(int i=1; i< _ids.size(); i++){
-
-        cout << "deltaL " << (_ids[i] - last) << endl;
-
-        if((_ids[i] - last ) <= 1){
-            mean = mean + _contour[_ids[i]];
-            length++;
-        }else{
-
-            cout << "length_in: " << length << endl;
-
-            //cluster ended
-            if(firstlength == 0){
-                firstlength = length;
-                firstmean = mean;
+    if (!_orderedTips.empty()){
+        for(int i=0; i< tips.size(); i++){
+            minDist =distanceThr+1;
+            cc = -1;
+            for(int j=0; j<_orderedTips.size(); j++){
+                cDist = (_orderedTips[j].x - tips[i].x)*(_orderedTips[j].x - tips[i].x) + (_orderedTips[j].y - tips[i].y)*(_orderedTips[j].y - tips[i].y);
+                if (cDist < minDist )
+                {
+                    cc = j;
+                    minDist = cDist;
+                }
             }
-
-            if (length > count_thr_l & length < count_thr_h){
-
-                //that is finger
-
-                realTips.push_back(Point(((double)mean.x)/length,((double)mean.y)/length)+Point(location.x,location.y));
-                length = 1;
-                mean = _contour[_ids[i]];
+            if (minDist <= distanceThr){
+                correspondence.push_back(pair<int, int>(i,cc));
             }
         }
-        last = _ids[i];
-    }
 
-    if(firstlength > 0){
-        length = length + firstlength;
-        //last ids points to contour last element
-        if (length > count_thr_l & length < count_thr_h){
-            mean = mean + firstmean;
+        for(int i=0; i<_orderedTips.size(); i++){
+            _orderedTips[i] = Point(-1,-1);
+        }
 
-            realTips[0] = Point(((double)mean.x)/length,((double)mean.y)/length)+Point(location.x,location.y);
+        for(int i=0; i<correspondence.size(); i++){
+            _orderedTips[correspondence[i].second] = tips[correspondence[i].first];
         }
     }
+    else{
+        int i=0;
+
+        while(i<std::min<int>(tips.size(),5)){
+            _orderedTips.push_back(tips[i]);
+            i++;
+        }
+
+        while(i<5){
+            _orderedTips.push_back(Point(-1,-1));
+            i++;
+        }
+    }
+
+
 }
-*/
+
+

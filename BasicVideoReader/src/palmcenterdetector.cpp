@@ -51,7 +51,7 @@ void PalmCenterDetector::computeCenterRobust(cv::Point &p, double &r, const cv::
     p = maxLoc;
     r = max;
 
-    threshold = 0.2*max;
+    threshold = 0.1*max;
 
     smallestDist = (lastP.x - maxLoc.x)*(lastP.x - maxLoc.x) + (lastP.y - maxLoc.y)*(lastP.y - maxLoc.y);
 
@@ -74,14 +74,22 @@ void PalmCenterDetector::computeCenterRobust(cv::Point &p, double &r, const cv::
     }
 }
 
-void PalmCenterDetector::computeCenter(Point &maxLoc, double &r, const Mat &mat)
+void PalmCenterDetector::computeCenter(Point &maxLoc, double &r, const cv::Rect &region, const Mat &patch)
 {
-    Mat output(mat.size(),CV_32FC1);
+    Mat output(patch.size(),CV_32FC1);
 
-    //compute fast distace transform
-    distanceTransform(mat,output,CV_DIST_L2,3);
+    //compute fast distace transform on the whole segmented region
+    distanceTransform(patch,output,CV_DIST_L2,3);
 
-    minMaxLoc(output,0,&r,0,&maxLoc);
+    //cut a part of segmented region
+    Mat submat = output(region);
+
+    //search minMax in the part region
+    minMaxLoc(submat,0,&r,0,&maxLoc);
+
+    //translate found in the region coordinate system
+    maxLoc.x += region.x;
+    maxLoc.y += region.y;
 }
 
 cv::Rect PalmCenterDetector::getPredictBox(int mwidth,int mheight)
@@ -96,17 +104,76 @@ cv::Rect PalmCenterDetector::getPredictBox(int mwidth,int mheight)
     return Rect(x,y,width,height);
 }
 
+void PalmCenterDetector::detect(Point &ps, double &rs, const Mat &patch)
+{
+    ps.x = ps.y = 0;
+
+    if(_iniCount <= 10){
+
+        if (_useRobust == false | _lastPosition.x < 0 | _lastPosition.y < 0 | _lastPosition.x >= patch.size().width | _lastPosition.y >= patch.size().height)
+        {
+            computeCenter(ps,rs,Rect(0,0,patch.size().width-1,patch.size().height-1),patch);
+        }
+        else{
+            computeCenterRobust(ps,rs,_lastPosition,patch);
+        }
+
+        if (_iniCount == 0){
+            _filter.statePost = (Mat_<float>(6,1) << ps.x, ps.y, rs, 0, 0, 0);
+        }else{
+            _filter.predict();
+            _filter.correct((Mat_<float>(3,1)<< ps.x,ps.y,rs));
+        }
+
+        _iniCount++;
+    }
+    else{
+        Mat state = _filter.predict();
+
+        float zoomFactor = 2;
+
+        int x = std::max((int)(state.at<float>(0,0)-_prop*state.at<float>(2,0)),0),
+            y = std::max((int)(state.at<float>(1,0)-_prop*state.at<float>(2,0)),0),
+            width = std::min(zoomFactor*_prop*state.at<float>(2,0),patch.size().width - (x+_prop*state.at<float>(2,0))-1),
+            height = std::min(zoomFactor*_prop*state.at<float>(2,0),patch.size().height - (y+_prop*state.at<float>(2,0))-1);
+
+        if (width <= 0 | height <= 0 | x < 0 | y < 0 | x + width >= patch.size().width | y + height >= patch.size().height){
+            _iniCount = 0;
+            cerr << "Hand lost; reinitialize" << endl;
+            reset();
+            return;
+        }
+
+        if (_useRobust == false | _lastPosition.x < 0 | _lastPosition.y < 0 | _lastPosition.x >= width | _lastPosition.y >= height){
+            computeCenter(ps,rs,Rect(x,y,width,height),patch);
+        }
+        else{
+            computeCenterRobust(ps,rs,_lastPosition,patch);
+        }
+
+        //smooth
+        state = _filter.correct((Mat_<float>(3,1) << ps.x, ps.y, rs));
+
+        ps.x = state.at<float>(0,0);
+        ps.y = state.at<float>(1,0);
+        rs = state.at<float>(2,0);
+    }
+
+    _lastPosition = ps;
+}
+
 void PalmCenterDetector::detect(Point &ps, double &rs, const Rect3D &pos, const Mat &mat)
 {
+    Rect pos2D(pos.x,pos.y,pos.width,pos.height);
+    Mat patch = mat(pos2D);
+
     if(_iniCount < 10){
         //cut mat part and compute EDT on it
-        Rect pos2D(pos.x,pos.y,pos.width,pos.height);
-        Mat patch = mat(pos2D);
 
         Point oldPoint = _lastPosition-Point(pos.x,pos.y);
 
         if (_useRobust == false | oldPoint.x < 0 | oldPoint.y < 0 | oldPoint.x >= patch.size().width | oldPoint.y >= patch.size().height){
-            computeCenter(ps,rs,patch);
+            computeCenter(ps,rs,Rect(0,0,patch.size().width-1,patch.size().height-1),patch);
         }
         else{
             computeCenterRobust(ps,rs,oldPoint,patch);
@@ -129,25 +196,25 @@ void PalmCenterDetector::detect(Point &ps, double &rs, const Rect3D &pos, const 
 
         float zoomFactor = 2;
 
-        int x = std::max((int)(state.at<float>(0,0)-_prop*state.at<float>(2,0)),0),
-            y = std::max((int)(state.at<float>(1,0)-_prop*state.at<float>(2,0)),0),
-            width = std::min(zoomFactor*_prop*state.at<float>(2,0),mat.size().width - (x+_prop*state.at<float>(2,0))-1),
-            height = std::min(zoomFactor*_prop*state.at<float>(2,0),mat.size().height - (y+_prop*state.at<float>(2,0))-1);
+        //translate predicted position in relative coordinates
+        int x = std::max((int)(state.at<float>(0,0)-_prop*state.at<float>(2,0))-pos.x,0),
+            y = std::max((int)(state.at<float>(1,0)-_prop*state.at<float>(2,0))-pos.y,0),
+            width = std::min(zoomFactor*_prop*state.at<float>(2,0),patch.size().width - (x+_prop*state.at<float>(2,0))-1),
+            height = std::min(zoomFactor*_prop*state.at<float>(2,0),patch.size().height - (y+_prop*state.at<float>(2,0))-1);
 
-        if (width <= 0 | height <= 0 | x < 0 | y < 0 | x + width >= mat.size().width | y + height >= mat.size().height){
+        if (width <= 0 | height <= 0 | x < 0 | y < 0 | x + width >= patch.size().width | y + height >= patch.size().height){
             _iniCount = 0;
             cerr << "Hand lost; reinitialize" << endl;
             reset();
             return;
         }
 
-        Rect pos2D(x,y,width,height);
-        Mat patch = mat(pos2D);
+        Rect pos2Dpredicted = Rect(x,y,width,height);
 
         Point oldPoint = _lastPosition-Point(x,y);
 
         if (_useRobust == false | oldPoint.x < 0 | oldPoint.y < 0 | oldPoint.x >= width | oldPoint.y >= height){
-            computeCenter(ps,rs,patch);
+            computeCenter(ps,rs,pos2Dpredicted,patch);
         }
         else{
             computeCenterRobust(ps,rs,oldPoint,patch);
@@ -155,6 +222,7 @@ void PalmCenterDetector::detect(Point &ps, double &rs, const Rect3D &pos, const 
 
         ps.x += pos2D.x;
         ps.y += pos2D.y;
+
 
         //smooth
         state = _filter.correct((Mat_<float>(3,1) << ps.x, ps.y, rs));

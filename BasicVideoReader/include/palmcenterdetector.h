@@ -16,10 +16,13 @@ public:
     void reset();
     void detect(cv::Point &ps, double &rs,const cv::Rect3D &pos, const cv::Mat &mat);
 
+    void detect(cv::Point &ps, double &rs, const cv::Mat &patch);
+
     cv::Rect getPredictBox(int mwidth,int mheight);
 
 private:
-    void computeCenter(cv::Point &p, double &r, const cv::Mat &mat);
+    void computeCenter(cv::Point &p, double &r, const cv::Rect &region,const cv::Mat &mat);
+
 
     void computeCenterRobust(cv::Point &p, double &r, const cv::Point &lastP,  const cv::Mat &mat);
 

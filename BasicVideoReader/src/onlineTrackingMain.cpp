@@ -90,11 +90,15 @@ int main(int argc, char **argv)
         ContourBasedFingerDetector fd;
         stringstream info;
         TrackDrawer drawer;
+        ofstream out;
+        string filename;
         //TrackDrawer noFilterDrawer;
         TrackDrawer robustDrawer;
         Point ps;
         double rs;
         bool trackerResult;
+        bool isLost = false;
+        int lossCount = 0;
         tracker.init();
         int i=0;
 
@@ -105,7 +109,19 @@ int main(int argc, char **argv)
         pdetectorR.reset();
         robustDrawer.setColor(Scalar(255,0,0));
 
+        vector<Scalar> colors;
+
+        colors.push_back(Scalar(255,0,0));
+        colors.push_back(Scalar(0,255,0));
+        colors.push_back(Scalar(0,0,255));
+        colors.push_back(Scalar(127,127,0));
+        colors.push_back(Scalar(0,127,127));
+
         //noFilterDrawer.setColor(Scalar(0,0,255));
+
+        vector<int> compression_params;
+        compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+        compression_params.push_back(0);
 
 
         while(true)
@@ -123,42 +139,54 @@ int main(int argc, char **argv)
 
             if(trackerResult=tracker.track(position,mask,depthMap,rgbImage)){
                 //perform morphology
-                Morphology::open(opened,mask,5);
+                Morphology::open(opened,mask,3);
                 mask.setTo(0);
-                Morphology::close(mask,opened,5);
+                Morphology::close(mask,opened,3);
+
+                Mat patch = mask(Rect(position.x,position.y,position.width,position.height));
 
                 copyTo3Chanels(toDisplay,mask);
                 //toDisplay.setTo(0);
 
                 /*KF*/
-                pdetector.detect(ps,rs,position,mask);
+                pdetector.detect(ps,rs,patch);
+                //to relative coordinates
+                ps.x += position.x;
+                ps.y += position.y;
                 drawer.drawTrack(toDisplay,ps);
                 circle(toDisplay,ps,rs,Scalar(0,255,0));
 
                 /*KF + make-it-more-robust*/
-                pdetectorR.detect(ps,rs,position,mask);
+                pdetectorR.detect(ps,rs,patch);
+                ps.x += position.x;
+                ps.y += position.y;
                 robustDrawer.drawTrack(toDisplay,ps);
-
                 circle(toDisplay,ps,rs,Scalar(255,0,0));
-            }
 
-            if(trackerResult){
+                /*detect and display finger tips*/
                 tips.clear();
-
-                fd.detectFingerTips(tips,position,mask);
+                fd.detectFingerTipsSuggestions(tips,patch);
 
                 if(!tips.empty()){
 
                     for(int i=0; i<tips.size(); i++){
-                        circle(toDisplay,tips[i],2,Scalar(255,0,0));
+                        circle(toDisplay,tips[i]+Point(position.x,position.y),2,Scalar(255,0,0));
                     }
 
                     tips.clear();
 
-                    fd.locateFingerTips(tips,position);
+                    fd.locateFingerTips(tips);
 
-                    for(int i=0; i<tips.size(); i++){
-                        circle(toDisplay,tips[i],10,Scalar(0,0,255));
+                    fd.orderFingerTips(tips,ps);
+
+                    vector<Point> ordedTips = fd.getOrderedTips();
+
+                    cout << "ordedTips.length: " << ordedTips.size() << endl;
+
+                    for(int i=0; i<ordedTips.size(); i++){
+                        if(ordedTips[i].x >= 0){
+                            circle(toDisplay,ordedTips[i]+Point(position.x,position.y),10,colors[i]);
+                        }
                     }
 
                     info.seekp(0);
@@ -168,6 +196,33 @@ int main(int argc, char **argv)
                     putText(toDisplay,info.str(),Point(depthMap.size().width*0.75,depthMap.size().height*0.75),FONT_HERSHEY_PLAIN,1,Scalar(100,100,100));
                 }
 
+            }else{
+                if (!isLost){
+                    /*
+                    //first los
+                    isLost = true;
+
+                    ss.seekp(0);
+                    ss << lossCount;
+
+                    imwrite("rgb_"+ss.str()+".png",rgbImage,compression_params);
+                    imwrite("depth_"+ss.str()+".png",depthMap,compression_params);
+
+                    filename = "position_"+ss.str()+".txt";
+
+                    out.open(filename.c_str());
+
+                    out << tracker.lastPosition().x << ";" <<
+                           tracker.lastPosition().y << ";" <<
+                           tracker.lastPosition().z << ";" <<
+                           tracker.lastPosition().width << ";" <<
+                           tracker.lastPosition().height << ";" <<
+                           tracker.lastPosition().depth << ";" << endl;
+
+                    out.close();
+
+                    lossCount++;*/
+                }
             }
 
             if(trackerResult){
@@ -189,6 +244,10 @@ int main(int argc, char **argv)
 
                 robustDrawer.reset();
                 pdetectorR.reset();
+
+                fd.reset();
+
+                isLost = false;
             }
 
             if (key == 'd'){

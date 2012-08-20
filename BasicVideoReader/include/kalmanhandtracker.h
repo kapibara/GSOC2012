@@ -22,6 +22,8 @@ public:
 
     bool track(cv::Rect3D &position, cv::Mat &mask, const cv::Mat &depth, const cv::Mat &rgb);
 
+    const cv::Rect3D &lastPosition(){ return _oldPosition;}
+
 private:
 
     inline void correctPosition(const cv::Mat &correction, int width, int height);
@@ -30,6 +32,7 @@ private:
     HandSegmentation *_segmentator;
 
     cv::Rect3D _position;
+    cv::Rect3D _oldPosition;
 
     const int CUMTHRESH;
 

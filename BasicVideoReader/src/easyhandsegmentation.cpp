@@ -100,6 +100,7 @@ void EasyHandSegmentation::segmentHand(cv::Mat &mask, cv::Rect3D &region, const 
         region.z = minz;
         region.depth = maxz - minz;
         if(region.depth < depthMinDiff){
+            region.z -= depthMinDiff/2;
             region.depth = depthMinDiff;
         }
     }
