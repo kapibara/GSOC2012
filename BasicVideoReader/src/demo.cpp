@@ -51,7 +51,6 @@ int main(int argc, char **argv)
     try
     {
         VideoCapture capture( CV_CAP_OPENNI );
-        VideoWriter writer("testoutput.avi");
 
         Mat depthMap;
         Mat rgbImage;
@@ -68,6 +67,8 @@ int main(int argc, char **argv)
         cout << "Frame size: " << depthMap.size().width << ";" << depthMap.size().height << endl;
         cout << "FPS: " << capture.get(CV_CAP_PROP_FPS) << endl;
 
+        VideoWriter writer("testvideo.avi",CV_FOURCC('M','J','P','G'),capture.get(CV_CAP_PROP_FPS),depthMap.size());
+
         Mat mask = Mat(depthMap.size(),CV_8UC1);
         Mat opened = Mat(depthMap.size(),CV_8UC1);
         Mat toDisplay(depthMap.size(),CV_8UC3);
@@ -77,15 +78,21 @@ int main(int argc, char **argv)
         vector<Point> tips;
         PalmCenterDetector pdetector;
         ContourBasedFingerDetector fd;
-        stringstream info;
-        GrabbableBall ball;
+        GrabbableBall have;
+        GrabbableBall fun;
         Point ps;
         double rs;
         bool trackerResult;
 
-        ball.setIniPosition(Point(rand()%(mask.size().width-200)+100,rand()%(mask.size().height-200)+100));
-        ball.setColor(Scalar(0,0,255));
-        ball.setIniRadius(50);
+        have.setIniPosition(Point(rand()%(mask.size().width-200)+100,rand()%(mask.size().height-200)+100));
+        have.setColor(Scalar(1,1,255));
+        have.setIniRadius(50);
+        have.setString("have");
+
+        fun.setIniPosition(Point(rand()%(mask.size().width-200)+100,rand()%(mask.size().height-200)+100));
+        fun.setColor(Scalar(1,255,255));
+        fun.setIniRadius(50);
+        fun.setString("fun!");
 
         pdetector.reset();
         pdetector.setUseRobust(false);
@@ -122,26 +129,28 @@ int main(int argc, char **argv)
                     tips.clear();
 
                     fd.locateFingerTips(tips);
-
+/*
                     info.str("");
                     info << "fingers: " << tips.size() << endl;
 
-                    putText(toDisplay,info.str(),Point(depthMap.size().width*0.75,depthMap.size().height*0.75),FONT_HERSHEY_PLAIN,1,Scalar(100,100,100));
-                }else{
+                    putText(toDisplay,info.str(),Point(depthMap.size().width*0.75,depthMap.size().height*0.75),FONT_HERSHEY_PLAIN,1,Scalar(100,100,100));*/
+                }/*else{
                     info.str("");
                     info << "fingers: " << 0 << endl;
 
                     putText(toDisplay,info.str(),Point(depthMap.size().width*0.75,depthMap.size().height*0.75),FONT_HERSHEY_PLAIN,1,Scalar(100,100,100));
 
-                }
+                }*/
 
-                ball.setCursorPosition(cv::Point3i(ps.x,ps.y,position.z + position.depth/2),(tips.size() <= 1));
-
+                have.setCursorPosition(cv::Point3i(ps.x,ps.y,position.z + position.depth/2),(tips.size() <= 1));
+                fun.setCursorPosition(cv::Point3i(ps.x,ps.y,position.z + position.depth/2),(tips.size() <= 1));
             }
 
-            ball.draw(toDisplay);
+            have.draw(toDisplay);
+            fun.draw(toDisplay);
 
             imshow("RGBImg",toDisplay);
+
             writer << toDisplay;
 
             key = waitKey(10);
@@ -156,13 +165,17 @@ int main(int argc, char **argv)
 
                 fd.reset();
 
-                ball.reset();
+                have.reset();
+                fun.reset();
             }
 
         }
+
     }
     catch(...)
     {
         cerr <<" exception caught" << endl;
     }
+
+
 }

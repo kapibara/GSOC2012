@@ -17,7 +17,6 @@ PalmCenterDetector::PalmCenterDetector(float timestep):_filter(6,3,0,CV_32FC1)
 
 void PalmCenterDetector::reset()
 {
-    cout << "timestep: " << _timestep << endl;
     _iniCount = 0;
     _filter.init(6,3,0,CV_32FC1);
     _filter.transitionMatrix =

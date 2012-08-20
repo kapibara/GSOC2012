@@ -1,6 +1,7 @@
 #ifndef GRABBABLEBALL_H
 #define GRABBABLEBALL_H
 
+#include <string>
 #include "grabbableobject.h"
 
 class GrabbableBall: public GrabbableObject
@@ -13,6 +14,7 @@ public:
     void setIniPosition(const cv::Point &iniPosition) {_pos = iniPosition; }
     void setAlpha(double alpha) {_alpha = alpha;}
     void setGrabbWaitThr(int thr) { _waitThr = thr;}
+    void setString(const std::string &text) {_text = text;_ts = cv::getTextSize(_text,cv::FONT_HERSHEY_SIMPLEX,1.5,2,0);}
 
     void reset();
     void draw(cv::Mat &image); //draw object on the image
@@ -31,6 +33,9 @@ private:
     int _grabbWait;
     int _waitThr;
     int _freeWait;
+
+    std::string  _text;
+    cv::Size _ts;
 
 };
 

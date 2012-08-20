@@ -15,11 +15,14 @@ GrabbableBall::GrabbableBall()
 }
 
 void GrabbableBall::draw(cv::Mat &image){
+
+
     if (!_grabbed)
-        circle(image,_pos,_r,_color,-1); //-1 means fill the circle
+        circle(image,_pos,_r,_color*0.5,-1); //-1 means fill the circle
     else {
-        circle(image,_pos,_r, _color, 5);
+        circle(image,_pos,_r, _color*0.5, 2);
     }
+    putText(image,_text,cv::Point(_pos.x - _ts.width/2, _pos.y+_ts.height/2),FONT_HERSHEY_SIMPLEX,1.5,_color,2);
 }
 
 void GrabbableBall::reset(){

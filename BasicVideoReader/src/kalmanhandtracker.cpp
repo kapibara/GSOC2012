@@ -18,8 +18,6 @@
 using namespace cv;
 using namespace std;
 
-/*TODO: _isDetectedCount can probabli replace _isDetected*/
-
 KalmanHandTracker::KalmanHandTracker(float timestep): _filter(6,3,0,CV_32FC1)
 {
     _segmentator = new EasyHandSegmentation();
