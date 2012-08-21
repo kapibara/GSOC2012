@@ -15,6 +15,7 @@ ContourBasedFingerDetector::ContourBasedFingerDetector()
     _cosThr = -0.01;
     _scalesCount = 20;
     _sqrDistance = 2500;
+    _unionThr = 10;
 }
 
 ContourBasedFingerDetector::~ContourBasedFingerDetector()
@@ -166,10 +167,9 @@ void ContourBasedFingerDetector::locateFingerTips(vector<Point> &tips)
         Point currentMean = _contour[_ids[0]];
         int currentElemCount=1;
         vector<int> lengths;
-        int thr = 10; //index difference allowed
 
         for(vector<int>::iterator i=(_ids.begin()+1); i!=_ids.end(); i++){
-            if ((*i - *(i-1)) < thr){
+            if ((*i - *(i-1)) < _unionThr){
                 currentMean = currentMean + _contour[*i];
                 currentElemCount++;
             }else{
@@ -185,7 +185,7 @@ void ContourBasedFingerDetector::locateFingerTips(vector<Point> &tips)
         lengths.push_back(currentElemCount);
 
         //relabel the first class if there is continious segment
-        if(_contour.size()-(_ids.back()+1)+_ids.front()<thr){
+        if(_contour.size()-(_ids.back()+1)+_ids.front()<_unionThr){
             tips[0] = tips[0]+tips[tips.size()-1];
             lengths[0] = lengths[0]+lengths[lengths.size()-1];
             tips.pop_back(); //remove the last element, since it is in the first already

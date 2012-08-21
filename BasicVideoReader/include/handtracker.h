@@ -26,8 +26,7 @@ public:
     virtual bool track(cv::Mat &mask, const cv::Mat &depth, const cv::Mat &rgb) = 0;
     virtual bool isTracking() = 0;
 
-    /*in general would be good idea to reinit, when setting new hand detector*/
-
+    /*set own hand detector; init() function should be called after setting hand detector*/
     virtual void setHandDetector(HandDetector *detector)
     {
         if (_detector!=0) delete _detector;

@@ -23,8 +23,7 @@ set(ONLINE onlineTrackingMain.cpp)
 
 set(DEMO demo.cpp)
 
-set(HEADERS ../include/segmentHandEasy.h
-            ../include/handsegmentation.h
+set(HEADERS ../include/handsegmentation.h
             ../include/easyhandsegmentation.h
             ../include/easyhanddetector.h
             ../include/fastqueue.hpp

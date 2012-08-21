@@ -6,6 +6,8 @@
 #include <handsegmentation.h>
 #include "fastqueue.hpp"
 
+
+/*class implementing fast region growing for hand segmentation*/
 class EasyHandSegmentation : public HandSegmentation
 {
 
@@ -15,8 +17,17 @@ public:
 
     EasyHandSegmentation(int maxObjectSize = 100000);
     ~EasyHandSegmentation();
+
+    /*init method; should be called after class creation*/
     void init();
 
+    /*Set b-depth threashold for region growing algorithm*/
+    void setUnionThreashold(int uniThr)
+    {
+        _depthThr = uniThr;
+    }
+
+    /*set the area used for segmentation -  by depth*/
     void setDepthThreashold(const short lowerT, const short upperT)
     {
         CV_Assert(lowerT < upperT);
@@ -24,11 +35,17 @@ public:
         _lt = lowerT;
         _ut = upperT;
     }
+
+    /*set maximal allowed object size in pixels*/
     void setMaxObjectSize(int maxObjectSize){
         _maxObjectSize = maxObjectSize;
     }
 
+    /*segment hand using both types of input;
+      rgb part is thrown away;
+      for compatibility with HandSegmentation interface*/
     void segmentHand(cv::Mat &mask, cv::Rect3D &region,  const cv::Mat &rgb, const cv::Mat &depth);
+    /*segmen hand using depth only; the real algorithm*/
     void segmentHand(cv::Mat &mask, cv::Rect3D &region,  const cv::Mat &depth);
 
 private:

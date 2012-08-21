@@ -3,6 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 
+/* The class is a container for a set of morphological operations*/
+
 class Morphology
 {
 public:

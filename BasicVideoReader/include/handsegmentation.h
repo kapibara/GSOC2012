@@ -4,6 +4,8 @@
 #include <opencv2/opencv.hpp>
 #include "rect3d.hpp"
 
+/*segment hand interface*/
+
 class HandSegmentation
 {
 public:

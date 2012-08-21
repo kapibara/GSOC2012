@@ -8,9 +8,7 @@ find_package(OpenCV REQUIRED)
 
 set(ILIBPATH /home/kuznetso/Development/KinectOpenNIVideocapture)
 
-#if(NOT CMAKE_BUILD_TYPE)
-        set(CMAKE_BUILD_TYPE Release)
-#endif()
+set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_INSTALL_PREFIX ${HOME}/bin)
 

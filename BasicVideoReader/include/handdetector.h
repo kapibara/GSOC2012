@@ -15,7 +15,10 @@ class HandDetector
 public:
     virtual ~HandDetector() {}
 
+    /*reset all parameters*/
     virtual void reset() = 0;
+
+    /*detect the object using depth man and rgb*/
     virtual bool detect(cv::Rect3D &position,const cv::Mat &depth,const cv::Mat &rgb) = 0;
 
 };

@@ -51,7 +51,7 @@ void PalmCenterDetector::computeCenterRobust(cv::Point &p, double &r, const cv::
     p = maxLoc;
     r = max;
 
-    threshold = 0.1*max;
+    threshold = _percentage*max;
 
     smallestDist = (lastP.x - maxLoc.x)*(lastP.x - maxLoc.x) + (lastP.y - maxLoc.y)*(lastP.y - maxLoc.y);
 

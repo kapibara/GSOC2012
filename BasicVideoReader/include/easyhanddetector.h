@@ -12,7 +12,9 @@ public:
     EasyHandDetector(short minDistance=0,short maxDistance=pow(2,14));
     ~EasyHandDetector();
 
+    /*reset state of hand detector*/
     void reset();
+    /*detect hand position; no hand segmentation is returned*/
     bool detect(cv::Rect3D &position,const cv::Mat &depth, const cv::Mat &rgb);
 private:
 
